@@ -119,7 +119,7 @@ app.get('/addcart', async(req,res)=>{
     if(findCart){
         return res.status(201).send(findCart)
     }
-    const fullcart = await Cart.find()
+    const fullcart = await Cart.find({})
     res.status(201).send(fullcart)
 })
 
@@ -158,7 +158,7 @@ const user = await bcrypt.compare(password,existUser.password)
    }
 })
 
-app.get('/user',async(req,res)=>{
+app.get('/p',async(req,res)=>{
     try {
         const user = await User .find()
         res.send(user)
