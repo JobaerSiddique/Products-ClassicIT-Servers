@@ -83,10 +83,7 @@ const ProductAddToCart = new mongoose.Schema({
         type:String,
         required:true
     },
-    img:{
-        type:String,
-        required:true
-    },
+    
     color:{
         type:String,
         required:true
@@ -114,6 +111,13 @@ app.post('/addcart', async(req,res)=>{
     const cart = req.body
     const addCart = await Cart.create(cart)
     res.status(201).send({message:"Add to Cart Successfully",addCart:addCart})
+})
+app.get('/addcart', async(req,res)=>{
+    const email= req.query.email;
+    const find={userEmail:email}
+    const findCart = await Cart.find(find)
+    
+    res.status(201).send(findCart)
 })
 
 app.post('/register', async(req,res)=>{
