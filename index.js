@@ -120,7 +120,6 @@ app.get('/addcart', async(req,res)=>{
         return res.status(201).send(findCart)
     }
     const fullcart = await Cart.find()
-    
     res.status(201).send(fullcart)
 })
 
