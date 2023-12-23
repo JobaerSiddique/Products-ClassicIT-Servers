@@ -116,8 +116,12 @@ app.get('/addcart', async(req,res)=>{
     const email= req.query.email;
     const find={userEmail:email}
     const findCart = await Cart.find(find)
+    if(findCart){
+        return res.status(201).send(findCart)
+    }
+    const fullcart = await Cart.find()
     
-    res.status(201).send(findCart)
+    res.status(201).send(fullcart)
 })
 
 app.post('/register', async(req,res)=>{
