@@ -5,8 +5,11 @@ const cors = require('cors')
 const bcrypt = require('bcrypt');
 const { ObjectId } = require('mongodb');
 require('dotenv').config()
+const jwt = require('jsonwebtoken');
 const port = 5000 || process.env.PORT;
 
+
+console.log(process.env.JWT_KEY);
 
 app.use(cors())
 app.use(express.json())
@@ -36,6 +39,21 @@ const userSchema = new mongoose.Schema({
     }
 })
 
+userSchema.methods.generateToken= async function (){
+    try {
+        return jwt.sign({
+            userId:this._id.toString(),
+            email:this.email
+        },
+        process.env.JWT_KEY,{
+            expiresIn:'1h'
+        }
+        )
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const User = mongoose.model("User",userSchema)
 
 const ProductSchema = new mongoose.Schema({
@@ -60,6 +78,43 @@ app.get('/', (req,res)=>{
     res.send("Hello Server is Running")
 })
 
+const ProductAddToCart = new mongoose.Schema({
+    title:{
+        type:String,
+        required:true
+    },
+    img:{
+        type:String,
+        required:true
+    },
+    color:{
+        type:String,
+        required:true
+    },
+    size:{
+        type:String,
+        required:true
+    },
+    
+    price:{
+        type:Number,
+        required:true
+    },
+    
+    userEmail:{
+        type:String,
+        required:true
+    },
+        
+})
+
+const Cart = mongoose.model("Cart",ProductAddToCart)
+
+app.post('/addcart', async(req,res)=>{
+    const cart = req.body
+    const addCart = await Cart.create(cart)
+    res.status(201).send({message:"Add to Cart Successfully",addCart:addCart})
+})
 
 app.post('/register', async(req,res)=>{
     const {email,password,name,image} = req.body
@@ -71,8 +126,8 @@ if(existUser){
 const saltRound = 10;
 const hash_password = await bcrypt.hash(password,saltRound)
     const UserCreated = await User.create({email,password:hash_password,name,image})
-    res.status(200).send({UserCreated,message:"Register Successfully"})
-   
+    res.status(200).json({UserCreated,message:"Register Successfully"})
+   console.log(UserCreated);
 })
 app.post('/login', async(req,res)=>{
    try {
@@ -87,7 +142,8 @@ const user = await bcrypt.compare(password,existUser.password)
 
    if(user){
     res.send({
-        message:"Login Successfully"
+        message:"Login Successfully",
+        existUser
     })
    }
    } catch (error) {
